@@ -1,0 +1,50 @@
+Games::Cards::Match
+
+DESCRIPTION
+
+The distribution comes with a handy game script 'play-cards-match'.
+
+USAGE: play-cards-match [-h] [long options...]
+
+    --packs=Int     Cards Pack Count. Default is 1.
+    --rules=String  Cards matching rule. Possible rules are 'value', 'suit'
+                    and 'both'. Default is 'both'.
+    --interactive   Play game in interactive mode. Default is OFF.
+    --verbose       Play the game in verbose mode. Default is OFF.
+
+    --usage         show a short help message
+    -h              show a compact help message
+    --help          show a long help message
+    --man           show the manual
+
+TODO
+
+1) Add parameters check.
+2) Add unit test.
+
+INSTALLATION
+
+To install this module, run the following commands:
+
+    perl Makefile.PL
+    make
+    make test
+    make install
+
+RULES
+
+Simulate a card game called "Match!" between two computer players using
+N packs of cards (standard 52 card, 4 suit packs).  The "Match!" matching
+condition can be the face value of the card, the suit, or both.
+The program should ask:
+
+   (a) how many packs of cards to use (N)
+   (b) which of the three matching conditions to use
+
+and then run a simulation of the cards being shuffled then played from
+the top of the pile.  When two matching cards are played sequentially,
+a player is chosen randomly as having declared "Match!" first and takes
+ownership of all cards played in that run.  Play continues until the
+pile is completely exhausted (any cards played without ending in a "Match!"
+at the time the pile is exhausted are ignored).  Tally up the total number
+of cards each player has accumulated and declare the winner/draw.

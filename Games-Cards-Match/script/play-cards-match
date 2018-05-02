@@ -1,0 +1,100 @@
+#!/usr/bin/perl
+
+package App::Games::Cards::Match;
+
+use Term::ReadKey;
+use Games::Cards::Match;
+
+use Moo;
+use namespace::autoclean;
+use Types::Standard -all;
+use MooX::Options;
+
+option 'packs' => (
+    is      => 'ro',
+    order   => 1,
+    isa     => Int,
+    format  => 'i',
+    default => sub { 1 },
+    doc     => 'Cards Pack Count. Default is 1.'
+);
+
+option 'rules' => (
+    is      => 'ro',
+    order   => 2,
+    isa     => Str,
+    format  => 's',
+    default => sub { 'both' },
+    doc     => "Cards matching rule. Possible rules are 'value', 'suit' or 'both'. Default is 'both'."
+);
+
+option 'interactive' => (
+    is      => 'ro',
+    order   => 3,
+    default => sub { 0 },
+    doc     => "Play the game in interactive mode. Default is OFF."
+);
+
+option 'verbose' => (
+    is      => 'ro',
+    order   => 4,
+    default => sub { 0  },
+    doc     => 'Play the game in verbose mode. Default is OFF.'
+);
+
+sub run {
+    my ($self) = @_;
+
+    die "ERROR: Invalid --packs value.\n" if ($self->{packs} <= 0);
+
+    select(STDOUT);
+    $|=1;
+
+    $SIG{'INT'} = sub { print {*STDOUT} "\n\nCaught Interrupt (^C), Aborting\n"; exit(1); };
+    my $game  = Games::Cards::Match->new(
+        { packs => $self->{packs},
+          rules => $self->{rules},
+          debug => $self->{verbose},
+        });
+
+    print {*STDOUT} "Press any key to begin the game ...\n";
+    ReadMode 'cbreak';
+    ReadKey(0);
+    ReadMode 'normal';
+    do {
+        $game->play;
+        if ($self->{interactive}) {
+            print {*STDOUT} sprintf("[%s] picked mismatched pair of cards.\n\n", $game->active->code);
+        }
+        $game->next_player;
+        if ($self->{interactive}) {
+            print {*STDOUT} "Press any key to continue the game ...\n";
+            ReadMode 'cbreak';
+            ReadKey(0);
+            ReadMode 'normal';
+        }
+    } until ($game->is_over);
+
+    print {*STDOUT} $game->final_score, "\n";
+    print {*STDOUT} $game->result, "\n";
+    print {*STDOUT} "Thank you.\n";
+}
+
+package main;
+
+use Term::ReadKey;
+use strict; use warnings;
+
+App::Games::Cards::Match->new_with_options->run;
+
+END {
+    ReadMode 'normal';
+
+    my $time = time - $^T;
+    my $mm   = $time / 60;
+    my $ss   = $time % 60;
+    my $hh   = $mm / 60;
+    $mm = $mm % 60;
+
+    print sprintf("Total Time: %02d:%02d:%02d.\n", $hh, $mm, $ss);
+}
